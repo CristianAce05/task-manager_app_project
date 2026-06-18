@@ -8,7 +8,9 @@ app.use(cors());
 app.use(express.json());
 
 const authRoutes = require('./routes/auth');
+const taskRoutes = require('./routes/tasks');
 app.use('/api/auth', authRoutes);
+app.use('/api/tasks', taskRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Task Manager API running' });
