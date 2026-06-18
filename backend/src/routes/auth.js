@@ -18,7 +18,7 @@ router.post('/register', async (req, res) => {
 
     const { data, error } = await supabase
       .from('users')
-      .insert([{ email, password_hash: passwordHash }])
+      .insert([{ email, password: passwordHash }])
       .select('id, email')
       .single();
 
