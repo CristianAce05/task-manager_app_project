@@ -14,6 +14,8 @@ function Dashboard() {
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState('')
   const [darkMode, setDarkMode] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   const theme = {
     background: darkMode ? '#1a1a2e' : '#f5f5f5',
@@ -80,6 +82,17 @@ function Dashboard() {
     }
   }
 
+  const filteredTasks = tasks.filter(task => {
+    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || task.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
+
+  function clearFilters() {
+    setSearchQuery('')
+    setStatusFilter('all')
+  }
+
   function handleLogout() {
     logout()
     navigate('/')
@@ -110,6 +123,33 @@ function Dashboard() {
       </div>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      {/* Search and Filter Controls */}
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
+        <input
+          type="text"
+          placeholder="Search by title..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          style={{ ...inputStyle, flex: '1 1 200px' }}
+        />
+        <select
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+          style={{ ...inputStyle, flex: '0 1 160px' }}
+        >
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+        <button
+          onClick={clearFilters}
+          style={{ padding: '8px 16px', cursor: 'pointer' }}
+        >
+          Clear filters
+        </button>
+      </div>
 
       {/* Task Form */}
       <div style={{ background: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: 8, padding: 20, marginBottom: 32 }}>
@@ -159,11 +199,11 @@ function Dashboard() {
       </div>
 
       {/* Task List */}
-      {tasks.length === 0 ? (
-        <p>No tasks yet. Create one above.</p>
+      {filteredTasks.length === 0 ? (
+        <p>{tasks.length === 0 ? 'No tasks yet. Create one above.' : 'No tasks match your filters.'}</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {tasks.map(task => (
+          {filteredTasks.map(task => (
             <div
               key={task.id}
               style={{
