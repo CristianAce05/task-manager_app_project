@@ -45,6 +45,24 @@ function Dashboard() {
     fetchTasks()
   }, [token])
 
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.id = 'dashboard-animations'
+    style.textContent = `
+      @keyframes fadeSlideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+    `
+    if (!document.getElementById('dashboard-animations')) {
+      document.head.appendChild(style)
+    }
+    return () => {
+      const existing = document.getElementById('dashboard-animations')
+      if (existing) existing.remove()
+    }
+  }, [])
+
   async function fetchTasks() {
     try {
       const res = await getTasks(token)
@@ -188,6 +206,21 @@ function Dashboard() {
       <div style={{ padding: '0 32px 32px' }}>
         {error && <p style={{ color: '#e53e3e', marginBottom: 16 }}>{error}</p>}
 
+        {/* Stats Bar */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+          {[
+            { label: 'Total Tasks',  value: tasks.length,                                         color: '#667eea' },
+            { label: 'Pending',      value: tasks.filter(t => t.status === 'pending').length,     color: '#ed8936' },
+            { label: 'In Progress',  value: tasks.filter(t => t.status === 'in_progress').length, color: '#4299e1' },
+            { label: 'Completed',    value: tasks.filter(t => t.status === 'completed').length,   color: '#48bb78' },
+          ].map(stat => (
+            <div key={stat.label} style={{ background: theme.cardBg, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', padding: 20 }}>
+              <div style={{ fontSize: 32, fontWeight: 800, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
+              <div style={{ fontSize: 13, color: theme.color, opacity: 0.7, marginTop: 6 }}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
         {/* Search and Filter Controls */}
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -274,10 +307,24 @@ function Dashboard() {
 
         {/* Task List */}
         {filteredTasks.length === 0 ? (
-          <p style={{ color: theme.color }}>{tasks.length === 0 ? 'No tasks yet. Create one above.' : 'No tasks match your filters.'}</p>
+          tasks.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: 16 }}>
+                <rect x="12" y="8" width="40" height="48" rx="4" stroke="#a0aec0" strokeWidth="2.5" fill="none" />
+                <line x1="20" y1="22" x2="44" y2="22" stroke="#a0aec0" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="20" y1="30" x2="44" y2="30" stroke="#a0aec0" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="20" y1="38" x2="34" y2="38" stroke="#a0aec0" strokeWidth="2.5" strokeLinecap="round" />
+                <rect x="24" y="4" width="16" height="8" rx="2" stroke="#a0aec0" strokeWidth="2.5" fill="none" />
+              </svg>
+              <p style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: theme.color }}>No tasks yet</p>
+              <p style={{ margin: 0, fontSize: 14, color: theme.color, opacity: 0.6 }}>Create your first task above</p>
+            </div>
+          ) : (
+            <p style={{ color: theme.color }}>No tasks match your filters.</p>
+          )
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {filteredTasks.map(task => (
+            {filteredTasks.map((task, index) => (
               <div
                 key={task.id}
                 style={{
@@ -289,6 +336,8 @@ function Dashboard() {
                   justifyContent: 'space-between',
                   alignItems: 'flex-start',
                   gap: 12,
+                  animation: 'fadeSlideIn 0.4s ease-out both',
+                  animationDelay: `${index * 0.08}s`,
                 }}
               >
                 <div style={{ flex: 1 }}>

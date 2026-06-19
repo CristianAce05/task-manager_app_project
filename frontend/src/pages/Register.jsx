@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { register as registerRequest } from '../api/auth'
 
@@ -7,6 +7,29 @@ function Register() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.id = 'register-animations'
+    style.textContent = `
+      @keyframes gradientShift {
+        0%   { background-position: 0% 50%; }
+        50%  { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      @keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+    `
+    if (!document.getElementById('register-animations')) {
+      document.head.appendChild(style)
+    }
+    return () => {
+      const existing = document.getElementById('register-animations')
+      if (existing) existing.remove()
+    }
+  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -32,12 +55,42 @@ function Register() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea, #764ba2)',
+      background: 'linear-gradient(-45deg, #667eea, #764ba2, #f64f59, #667eea)',
+      backgroundSize: '400% 400%',
+      animation: 'gradientShift 8s ease infinite',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '24px',
+      position: 'relative',
+      overflow: 'hidden',
     }}>
+      {/* Background blobs */}
+      <div style={{
+        position: 'absolute',
+        top: '-60px',
+        left: '-60px',
+        width: 300,
+        height: 300,
+        borderRadius: '50%',
+        background: '#764ba2',
+        filter: 'blur(80px)',
+        opacity: 0.3,
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '-60px',
+        right: '-60px',
+        width: 300,
+        height: 300,
+        borderRadius: '50%',
+        background: '#667eea',
+        filter: 'blur(80px)',
+        opacity: 0.3,
+        pointerEvents: 'none',
+      }} />
+
       <div style={{
         background: '#fff',
         borderRadius: 16,
@@ -45,6 +98,8 @@ function Register() {
         padding: '40px',
         maxWidth: 420,
         width: '100%',
+        position: 'relative',
+        animation: 'fadeSlideUp 0.6s ease-out both',
       }}>
         <h2 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 800, color: '#1a202c' }}>
           Create Account
