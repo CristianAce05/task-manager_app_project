@@ -16,6 +16,20 @@ function Dashboard() {
   const [darkMode, setDarkMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [hoveredBtn, setHoveredBtn] = useState(null)
+
+  function hoverProps(key) {
+    return {
+      onMouseEnter: () => setHoveredBtn(key),
+      onMouseLeave: () => setHoveredBtn(null),
+    }
+  }
+
+  function hoverStyle(key) {
+    return hoveredBtn === key
+      ? { transform: 'scale(1.03)', transition: 'all 0.2s ease' }
+      : { transform: 'scale(1)', transition: 'all 0.2s ease' }
+  }
 
   const theme = {
     background: darkMode ? '#1a202c' : '#f7fafc',
@@ -146,17 +160,25 @@ function Dashboard() {
         alignItems: 'center',
         marginBottom: 32,
       }}>
-        <span style={{ color: '#fff', fontSize: 22, fontWeight: 800 }}>TaskManager</span>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: 10 }}>
+            <circle cx="16" cy="16" r="14" stroke="#fff" strokeWidth="2.5" />
+            <polyline points="9,16 14,21 23,11" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span style={{ color: '#fff', fontSize: 22, fontWeight: 800 }}>TaskManager</span>
+        </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             onClick={() => setDarkMode(d => !d)}
-            style={{ padding: '8px 16px', cursor: 'pointer', background: 'transparent', color: '#fff', border: '1px solid #fff', borderRadius: 8, fontSize: 14 }}
+            style={{ padding: '8px 16px', cursor: 'pointer', background: 'transparent', color: '#fff', border: '1px solid #fff', borderRadius: 8, fontSize: 14, ...hoverStyle('darkMode') }}
+            {...hoverProps('darkMode')}
           >
             {darkMode ? 'Light Mode' : 'Dark Mode'}
           </button>
           <button
             onClick={handleLogout}
-            style={{ padding: '8px 16px', cursor: 'pointer', background: 'transparent', color: '#fff', border: '1px solid #fff', borderRadius: 8, fontSize: 14 }}
+            style={{ padding: '8px 16px', cursor: 'pointer', background: 'transparent', color: '#fff', border: '1px solid #fff', borderRadius: 8, fontSize: 14, ...hoverStyle('logout') }}
+            {...hoverProps('logout')}
           >
             Log Out
           </button>
@@ -188,7 +210,8 @@ function Dashboard() {
             </select>
             <button
               onClick={clearFilters}
-              style={{ padding: '12px 20px', cursor: 'pointer', borderRadius: 8, border: `1px solid ${theme.inputBorder}`, background: theme.cardBg, color: theme.color, fontSize: 14 }}
+              style={{ padding: '12px 20px', cursor: 'pointer', borderRadius: 8, border: `1px solid ${theme.inputBorder}`, background: theme.cardBg, color: theme.color, fontSize: 14, ...hoverStyle('clearFilters') }}
+              {...hoverProps('clearFilters')}
             >
               Clear filters
             </button>
@@ -232,14 +255,15 @@ function Dashboard() {
               style={inputStyle}
             />
             <div style={{ display: 'flex', gap: 8 }}>
-              <button type="submit" style={gradientBtn}>
+              <button type="submit" style={{ ...gradientBtn, ...hoverStyle('submit') }} {...hoverProps('submit')}>
                 {editingId ? 'Update Task' : 'Add Task'}
               </button>
               {editingId && (
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  style={{ ...gradientBtn, background: 'transparent', color: theme.color, border: `1px solid ${theme.inputBorder}` }}
+                  style={{ ...gradientBtn, background: 'transparent', color: theme.color, border: `1px solid ${theme.inputBorder}`, ...hoverStyle('cancel') }}
+                  {...hoverProps('cancel')}
                 >
                   Cancel
                 </button>
@@ -292,13 +316,15 @@ function Dashboard() {
                 <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                   <button
                     onClick={() => handleEdit(task)}
-                    style={{ padding: '6px 14px', cursor: 'pointer', background: 'transparent', color: '#667eea', border: '1px solid #667eea', borderRadius: 8, fontSize: 13, fontWeight: 600 }}
+                    style={{ padding: '6px 14px', cursor: 'pointer', background: 'transparent', color: '#667eea', border: '1px solid #667eea', borderRadius: 8, fontSize: 13, fontWeight: 600, ...hoverStyle(`edit-${task.id}`) }}
+                    {...hoverProps(`edit-${task.id}`)}
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(task.id)}
-                    style={{ padding: '6px 14px', cursor: 'pointer', background: '#e53e3e', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600 }}
+                    style={{ padding: '6px 14px', cursor: 'pointer', background: '#e53e3e', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, ...hoverStyle(`delete-${task.id}`) }}
+                    {...hoverProps(`delete-${task.id}`)}
                   >
                     Delete
                   </button>
