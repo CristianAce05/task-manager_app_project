@@ -18,12 +18,12 @@ function Dashboard() {
   const [statusFilter, setStatusFilter] = useState('all')
 
   const theme = {
-    background: darkMode ? '#1a1a2e' : '#f5f5f5',
-    color: darkMode ? '#e0e0e0' : '#111',
-    cardBg: darkMode ? '#16213e' : '#fff',
-    border: darkMode ? '#0f3460' : '#ddd',
-    inputBg: darkMode ? '#0f3460' : '#fff',
-    inputColor: darkMode ? '#e0e0e0' : '#111',
+    background: darkMode ? '#1a202c' : '#f7fafc',
+    color: darkMode ? '#e2e8f0' : '#1a202c',
+    cardBg: darkMode ? '#2d3748' : '#fff',
+    inputBg: darkMode ? '#4a5568' : '#fff',
+    inputColor: darkMode ? '#e2e8f0' : '#1a202c',
+    inputBorder: darkMode ? '#4a5568' : '#e2e8f0',
   }
 
   useEffect(() => {
@@ -98,148 +98,216 @@ function Dashboard() {
     navigate('/')
   }
 
+  const cardStyle = {
+    background: theme.cardBg,
+    borderRadius: 12,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    padding: '24px',
+    marginBottom: 24,
+  }
+
   const inputStyle = {
-    padding: '8px 12px',
+    width: '100%',
+    padding: '12px',
     fontSize: 14,
     background: theme.inputBg,
     color: theme.inputColor,
-    border: `1px solid ${theme.border}`,
-    borderRadius: 4,
+    border: `1px solid ${theme.inputBorder}`,
+    borderRadius: 8,
+    boxSizing: 'border-box',
+    outline: 'none',
+  }
+
+  const gradientBtn = {
+    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 8,
+    padding: '12px 24px',
+    fontSize: 14,
+    fontWeight: 'bold',
+    cursor: 'pointer',
+  }
+
+  const statusBadge = {
+    pending:     { background: '#ed8936', color: '#fff' },
+    in_progress: { background: '#4299e1', color: '#fff' },
+    completed:   { background: '#48bb78', color: '#fff' },
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: theme.background, color: theme.color, padding: 24 }}>
+    <div style={{ minHeight: '100vh', background: theme.background, color: theme.color }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h2 style={{ margin: 0 }}>My Tasks</h2>
+      <div style={{
+        background: 'linear-gradient(135deg, #667eea, #764ba2)',
+        padding: '20px 32px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 32,
+      }}>
+        <span style={{ color: '#fff', fontSize: 22, fontWeight: 800 }}>TaskManager</span>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => setDarkMode(d => !d)} style={{ padding: '6px 14px', cursor: 'pointer' }}>
+          <button
+            onClick={() => setDarkMode(d => !d)}
+            style={{ padding: '8px 16px', cursor: 'pointer', background: 'transparent', color: '#fff', border: '1px solid #fff', borderRadius: 8, fontSize: 14 }}
+          >
             {darkMode ? 'Light Mode' : 'Dark Mode'}
           </button>
-          <button onClick={handleLogout} style={{ padding: '6px 14px', cursor: 'pointer' }}>
+          <button
+            onClick={handleLogout}
+            style={{ padding: '8px 16px', cursor: 'pointer', background: 'transparent', color: '#fff', border: '1px solid #fff', borderRadius: 8, fontSize: 14 }}
+          >
             Log Out
           </button>
         </div>
       </div>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <div style={{ padding: '0 32px 32px' }}>
+        {error && <p style={{ color: '#e53e3e', marginBottom: 16 }}>{error}</p>}
 
-      {/* Search and Filter Controls */}
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
-        <input
-          type="text"
-          placeholder="Search by title..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          style={{ ...inputStyle, flex: '1 1 200px' }}
-        />
-        <select
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          style={{ ...inputStyle, flex: '0 1 160px' }}
-        >
-          <option value="all">All</option>
-          <option value="pending">Pending</option>
-          <option value="in_progress">In Progress</option>
-          <option value="completed">Completed</option>
-        </select>
-        <button
-          onClick={clearFilters}
-          style={{ padding: '8px 16px', cursor: 'pointer' }}
-        >
-          Clear filters
-        </button>
-      </div>
-
-      {/* Task Form */}
-      <div style={{ background: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: 8, padding: 20, marginBottom: 32 }}>
-        <h3 style={{ marginTop: 0 }}>{editingId ? 'Edit Task' : 'New Task'}</h3>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <input
-            type="text"
-            placeholder="Title"
-            value={form.title}
-            onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-            required
-            style={inputStyle}
-          />
-          <textarea
-            placeholder="Description"
-            value={form.description}
-            onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-            rows={3}
-            style={{ ...inputStyle, resize: 'vertical' }}
-          />
-          <select
-            value={form.status}
-            onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-            style={inputStyle}
-          >
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
-          <input
-            type="date"
-            value={form.due_date}
-            onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))}
-            style={inputStyle}
-          />
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button type="submit" style={{ padding: '8px 20px', cursor: 'pointer' }}>
-              {editingId ? 'Update Task' : 'Add Task'}
-            </button>
-            {editingId && (
-              <button type="button" onClick={handleCancelEdit} style={{ padding: '8px 20px', cursor: 'pointer' }}>
-                Cancel
-              </button>
-            )}
-          </div>
-        </form>
-      </div>
-
-      {/* Task List */}
-      {filteredTasks.length === 0 ? (
-        <p>{tasks.length === 0 ? 'No tasks yet. Create one above.' : 'No tasks match your filters.'}</p>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {filteredTasks.map(task => (
-            <div
-              key={task.id}
-              style={{
-                background: theme.cardBg,
-                border: `1px solid ${theme.border}`,
-                borderRadius: 8,
-                padding: 16,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: 12,
-              }}
+        {/* Search and Filter Controls */}
+        <div style={{ ...cardStyle, padding: 20 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              placeholder="Search by title..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{ ...inputStyle, flex: '1 1 200px' }}
+            />
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              style={{ ...inputStyle, flex: '0 1 160px' }}
             >
-              <div style={{ flex: 1 }}>
-                <strong style={{ fontSize: 16 }}>{task.title}</strong>
-                {task.description && <p style={{ margin: '4px 0', fontSize: 14 }}>{task.description}</p>}
-                <div style={{ fontSize: 13, marginTop: 4, display: 'flex', gap: 16 }}>
-                  <span>Status: <em>{task.status}</em></span>
-                  {task.due_date && <span>Due: {task.due_date.slice(0, 10)}</span>}
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+            <button
+              onClick={clearFilters}
+              style={{ padding: '12px 20px', cursor: 'pointer', borderRadius: 8, border: `1px solid ${theme.inputBorder}`, background: theme.cardBg, color: theme.color, fontSize: 14 }}
+            >
+              Clear filters
+            </button>
+          </div>
+        </div>
+
+        {/* Task Form */}
+        <div style={cardStyle}>
+          <h3 style={{ marginTop: 0, marginBottom: 16, fontSize: 18, fontWeight: 700 }}>
+            {editingId ? 'Edit Task' : 'New Task'}
+          </h3>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <input
+              type="text"
+              placeholder="Title"
+              value={form.title}
+              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+              required
+              style={inputStyle}
+            />
+            <textarea
+              placeholder="Description"
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              rows={3}
+              style={{ ...inputStyle, resize: 'vertical' }}
+            />
+            <select
+              value={form.status}
+              onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
+              style={inputStyle}
+            >
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+            <input
+              type="date"
+              value={form.due_date}
+              onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))}
+              style={inputStyle}
+            />
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button type="submit" style={gradientBtn}>
+                {editingId ? 'Update Task' : 'Add Task'}
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  style={{ ...gradientBtn, background: 'transparent', color: theme.color, border: `1px solid ${theme.inputBorder}` }}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+
+        {/* Task List */}
+        {filteredTasks.length === 0 ? (
+          <p style={{ color: theme.color }}>{tasks.length === 0 ? 'No tasks yet. Create one above.' : 'No tasks match your filters.'}</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {filteredTasks.map(task => (
+              <div
+                key={task.id}
+                style={{
+                  background: theme.cardBg,
+                  borderRadius: 12,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  padding: 20,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  gap: 12,
+                }}
+              >
+                <div style={{ flex: 1 }}>
+                  <strong style={{ fontSize: 16, color: theme.color }}>{task.title}</strong>
+                  {task.description && (
+                    <p style={{ margin: '6px 0', fontSize: 14, color: theme.color, opacity: 0.8 }}>{task.description}</p>
+                  )}
+                  <div style={{ marginTop: 8, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span style={{
+                      ...(statusBadge[task.status] || { background: '#718096', color: '#fff' }),
+                      padding: '3px 10px',
+                      borderRadius: 20,
+                      fontSize: 12,
+                      fontWeight: 600,
+                    }}>
+                      {task.status.replace('_', ' ')}
+                    </span>
+                    {task.due_date && (
+                      <span style={{ fontSize: 13, color: theme.color, opacity: 0.7 }}>
+                        Due: {task.due_date.slice(0, 10)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button
+                    onClick={() => handleEdit(task)}
+                    style={{ padding: '6px 14px', cursor: 'pointer', background: 'transparent', color: '#667eea', border: '1px solid #667eea', borderRadius: 8, fontSize: 13, fontWeight: 600 }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(task.id)}
+                    style={{ padding: '6px 14px', cursor: 'pointer', background: '#e53e3e', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600 }}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                <button onClick={() => handleEdit(task)} style={{ padding: '4px 12px', cursor: 'pointer' }}>
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(task.id)}
-                  style={{ padding: '4px 12px', cursor: 'pointer', color: '#fff', background: '#c0392b', border: 'none', borderRadius: 4 }}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
