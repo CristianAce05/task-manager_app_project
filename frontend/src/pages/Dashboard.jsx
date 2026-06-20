@@ -203,7 +203,7 @@ function Dashboard() {
         </div>
       </div>
 
-      <div style={{ padding: '0 32px 32px' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px 32px' }}>
         {error && <p style={{ color: '#e53e3e', marginBottom: 16 }}>{error}</p>}
 
         {/* Stats Bar */}
