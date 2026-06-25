@@ -1,9 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getTasks, createTask, updateTask, deleteTask } from '../api/tasks'
 
 const EMPTY_FORM = { title: '', description: '', status: 'pending', due_date: '' }
+
+const QUOTES = [
+  "The secret of getting ahead is getting started.",
+  "Focus on being productive instead of busy.",
+  "Small progress is still progress.",
+  "Done is better than perfect.",
+  "One task at a time.",
+]
+
+function parseLocalDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
 
 function Dashboard() {
   const { token, logout } = useAuth()
@@ -18,13 +31,6 @@ function Dashboard() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [hoveredBtn, setHoveredBtn] = useState(null)
 
-  const QUOTES = [
-    "The secret of getting ahead is getting started.",
-    "Focus on being productive instead of busy.",
-    "Small progress is still progress.",
-    "Done is better than perfect.",
-    "One task at a time.",
-  ]
   const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)])
 
   function hoverProps(key) {
@@ -52,7 +58,7 @@ function Dashboard() {
   useEffect(() => {
     if (!token) { navigate('/'); return }
     fetchTasks()
-  }, [token])
+  }, [token, navigate, fetchTasks])
 
   useEffect(() => {
     const style = document.createElement('style')
@@ -77,14 +83,14 @@ function Dashboard() {
     }
   }, [])
 
-  async function fetchTasks() {
+  const fetchTasks = useCallback(async () => {
     try {
       const res = await getTasks(token)
       setTasks(res.data.tasks)
     } catch {
       setError('Failed to load tasks.')
     }
-  }
+  }, [token])
 
   function handleEdit(task) {
     setEditingId(task.id)
@@ -120,6 +126,7 @@ function Dashboard() {
   }
 
   async function handleDelete(id) {
+    setError('')
     try {
       await deleteTask(token, id)
       setTasks(prev => prev.filter(t => t.id !== id))
@@ -419,14 +426,12 @@ function Dashboard() {
               const upcoming = tasks
                 .filter(t => {
                   if (!t.due_date) return false
-                  const due = new Date(t.due_date)
-                  due.setHours(0, 0, 0, 0)
+                  const due = parseLocalDate(t.due_date)
                   const diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24))
                   return diff >= 0 && diff <= 7
                 })
                 .map(t => {
-                  const due = new Date(t.due_date)
-                  due.setHours(0, 0, 0, 0)
+                  const due = parseLocalDate(t.due_date)
                   const daysLeft = Math.ceil((due - today) / (1000 * 60 * 60 * 24))
                   const urgencyColor = daysLeft <= 2 ? '#e53e3e' : daysLeft <= 5 ? '#ed8936' : '#4299e1'
                   return { ...t, daysLeft, urgencyColor, dueObj: due }
@@ -445,10 +450,10 @@ function Dashboard() {
                 tasks
                   .filter(t => {
                     if (!t.due_date) return false
-                    const d = new Date(t.due_date)
+                    const d = parseLocalDate(t.due_date)
                     return d.getMonth() === thisMonth && d.getFullYear() === thisYear
                   })
-                  .map(t => new Date(t.due_date).getDate())
+                  .map(t => parseLocalDate(t.due_date).getDate())
               )
 
               const firstDow    = new Date(thisYear, thisMonth, 1).getDay()
