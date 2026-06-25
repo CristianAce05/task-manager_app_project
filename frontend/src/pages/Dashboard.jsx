@@ -55,6 +55,15 @@ function Dashboard() {
     inputBorder: darkMode ? '#4a5568' : '#e2e8f0',
   }
 
+  const fetchTasks = useCallback(async () => {
+    try {
+      const res = await getTasks(token)
+      setTasks(res.data.tasks)
+    } catch {
+      setError('Failed to load tasks.')
+    }
+  }, [token])
+
   useEffect(() => {
     if (!token) { navigate('/'); return }
     fetchTasks()
@@ -82,15 +91,6 @@ function Dashboard() {
       if (existing) existing.remove()
     }
   }, [])
-
-  const fetchTasks = useCallback(async () => {
-    try {
-      const res = await getTasks(token)
-      setTasks(res.data.tasks)
-    } catch {
-      setError('Failed to load tasks.')
-    }
-  }, [token])
 
   function handleEdit(task) {
     setEditingId(task.id)

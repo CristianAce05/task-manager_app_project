@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { register as registerRequest } from '../api/auth'
+import { useAuth } from '../context/AuthContext'
 
 function Register() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const { token } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (token) { navigate('/dashboard'); return }
+  }, [token, navigate])
 
   useEffect(() => {
     const style = document.createElement('style')

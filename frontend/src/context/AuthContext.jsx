@@ -4,11 +4,28 @@ import { jwtDecode } from 'jwt-decode'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('token') || null)
+  const [token, setToken] = useState(() => {
+    const stored = localStorage.getItem('token')
+    if (!stored) return null
+    try {
+      const decoded = jwtDecode(stored)
+      if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+        localStorage.removeItem('token')
+        return null
+      }
+      return stored
+    } catch {
+      localStorage.removeItem('token')
+      return null
+    }
+  })
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem('token')
+    if (!stored) return null
     try {
-      return stored ? jwtDecode(stored) : null
+      const decoded = jwtDecode(stored)
+      if (decoded.exp && decoded.exp * 1000 < Date.now()) return null
+      return decoded
     } catch {
       return null
     }
