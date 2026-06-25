@@ -136,7 +136,7 @@ function Dashboard() {
   }
 
   const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSearch = (task.title || '').toLowerCase().includes(searchQuery.toLowerCase())
     const matchesStatus = statusFilter === 'all' || task.status === statusFilter
     return matchesSearch && matchesStatus
   })
