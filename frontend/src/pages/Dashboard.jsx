@@ -594,7 +594,7 @@ function Dashboard() {
                       fontSize: 12,
                       fontWeight: 600,
                     }}>
-                      {task.status.replace('_', ' ')}
+                      {(task.status || '').replace('_', ' ')}
                     </span>
                     {task.due_date && (
                       <span style={{ fontSize: 13, color: theme.color, opacity: 0.7 }}>
