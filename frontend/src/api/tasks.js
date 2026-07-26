@@ -1,21 +1,21 @@
-import axios from 'axios'
+import api from './client'
 
 function authHeaders(token) {
   return { headers: { Authorization: `Bearer ${token}` } }
 }
 
 export function getTasks(token) {
-  return axios.get('/api/tasks', authHeaders(token))
+  return api.get('/api/tasks', authHeaders(token))
 }
 
 export function createTask(token, taskData) {
-  return axios.post('/api/tasks', taskData, authHeaders(token))
+  return api.post('/api/tasks', taskData, authHeaders(token))
 }
 
 export function updateTask(token, id, taskData) {
-  return axios.put(`/api/tasks/${id}`, taskData, authHeaders(token))
+  return api.put(`/api/tasks/${id}`, taskData, authHeaders(token))
 }
 
 export function deleteTask(token, id) {
-  return axios.delete(`/api/tasks/${id}`, authHeaders(token))
+  return api.delete(`/api/tasks/${id}`, authHeaders(token))
 }
