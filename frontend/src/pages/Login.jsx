@@ -3,10 +3,14 @@ import { useNavigate, Link } from 'react-router-dom'
 import { login as loginRequest } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
 
+const DEMO_EMAIL = 'demo@taskmanager.app'
+const DEMO_PASSWORD = 'DemoPass2026!'
+
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [demoLoading, setDemoLoading] = useState(false)
   const { login, token } = useAuth()
   const navigate = useNavigate()
 
@@ -46,6 +50,19 @@ function Login() {
       navigate('/dashboard')
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed. Please try again.')
+    }
+  }
+
+  async function handleTryDemo() {
+    setError('')
+    setDemoLoading(true)
+    try {
+      const res = await loginRequest(DEMO_EMAIL, DEMO_PASSWORD)
+      login(res.data.token)
+      navigate('/dashboard')
+    } catch (err) {
+      setError(err.response?.data?.error || 'Demo login failed. Please try again.')
+      setDemoLoading(false)
     }
   }
 
@@ -111,9 +128,37 @@ function Login() {
         <h2 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 800, color: '#1a202c' }}>
           Welcome Back
         </h2>
-        <p style={{ margin: '0 0 28px', fontSize: 15, color: '#718096' }}>
+        <p style={{ margin: '0 0 20px', fontSize: 15, color: '#718096' }}>
           Sign in to your account
         </p>
+
+        <button
+          type="button"
+          onClick={handleTryDemo}
+          disabled={demoLoading}
+          style={{
+            width: '100%',
+            padding: '14px',
+            borderRadius: 8,
+            border: '2px solid #667eea',
+            background: '#fff',
+            color: '#667eea',
+            fontSize: 15,
+            fontWeight: 700,
+            cursor: demoLoading ? 'default' : 'pointer',
+            opacity: demoLoading ? 0.7 : 1,
+            marginBottom: 20,
+          }}
+        >
+          {demoLoading ? 'Loading demo…' : 'Try the Demo (no signup needed)'}
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+          <span style={{ fontSize: 13, color: '#a0aec0' }}>or sign in</span>
+          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+        </div>
+
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <input
             type="email"
