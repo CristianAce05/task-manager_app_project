@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { login as loginRequest } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 
 const DEMO_EMAIL = 'demo@taskmanager.app'
 const DEMO_PASSWORD = 'DemoPass2026!'
@@ -12,34 +13,12 @@ function Login() {
   const [error, setError] = useState('')
   const [demoLoading, setDemoLoading] = useState(false)
   const { login, token } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
   useEffect(() => {
     if (token) { navigate('/dashboard'); return }
   }, [token, navigate])
-
-  useEffect(() => {
-    const style = document.createElement('style')
-    style.id = 'login-animations'
-    style.textContent = `
-      @keyframes gradientShift {
-        0%   { background-position: 0% 50%; }
-        50%  { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
-      @keyframes fadeSlideUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-    `
-    if (!document.getElementById('login-animations')) {
-      document.head.appendChild(style)
-    }
-    return () => {
-      const existing = document.getElementById('login-animations')
-      if (existing) existing.remove()
-    }
-  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -66,107 +45,103 @@ function Login() {
     }
   }
 
-  const inputStyle = {
-    width: '100%',
-    padding: '14px',
-    borderRadius: 8,
-    border: '1px solid #e2e8f0',
-    fontSize: 15,
-    outline: 'none',
-    boxSizing: 'border-box',
-  }
-
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(-45deg, #667eea, #764ba2, #f64f59, #667eea)',
-      backgroundSize: '400% 400%',
-      animation: 'gradientShift 8s ease infinite',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Background blobs */}
-      <div style={{
-        position: 'absolute',
-        top: '-60px',
-        left: '-60px',
-        width: 300,
-        height: 300,
-        borderRadius: '50%',
-        background: '#764ba2',
-        filter: 'blur(80px)',
-        opacity: 0.3,
-        pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute',
-        bottom: '-60px',
-        right: '-60px',
-        width: 300,
-        height: 300,
-        borderRadius: '50%',
-        background: '#667eea',
-        filter: 'blur(80px)',
-        opacity: 0.3,
-        pointerEvents: 'none',
-      }} />
-
-      <div style={{
-        background: '#fff',
-        borderRadius: 16,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-        padding: '40px',
-        maxWidth: 420,
-        width: '100%',
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'var(--bg)',
         position: 'relative',
-        animation: 'fadeSlideUp 0.6s ease-out both',
-      }}>
-        <h2 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 800, color: '#1a202c' }}>
-          Welcome Back
-        </h2>
-        <p style={{ margin: '0 0 20px', fontSize: 15, color: '#718096' }}>
-          Sign in to your account
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 24,
+      }}
+    >
+      {/* Ambient glow blobs — brand color, static-safe under reduced motion */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: '-120px',
+          left: '-100px',
+          width: 340,
+          height: 340,
+          borderRadius: '50%',
+          background: 'var(--primary)',
+          filter: 'blur(90px)',
+          opacity: 0.22,
+          animation: 'floatGlow 10s ease-in-out infinite',
+          pointerEvents: 'none',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          bottom: '-140px',
+          right: '-100px',
+          width: 380,
+          height: 380,
+          borderRadius: '50%',
+          background: 'var(--accent)',
+          filter: 'blur(100px)',
+          opacity: 0.18,
+          animation: 'floatGlow 12s ease-in-out infinite reverse',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="btn btn-ghost btn-sm"
+        style={{ position: 'absolute', top: 20, right: 20 }}
+        aria-label="Toggle dark mode"
+      >
+        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+      </button>
+
+      <div
+        className="card anim-fade-up"
+        style={{ maxWidth: 420, width: '100%', position: 'relative', zIndex: 1 }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="var(--primary)" strokeWidth="2.5" />
+            <polyline points="9,16 14,21 23,11" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: 'var(--ink)' }}>
+            Welcome back
+          </h1>
+        </div>
+        <p style={{ margin: '0 0 24px', fontSize: 15, color: 'var(--muted)' }}>
+          Sign in to keep your work moving.
         </p>
 
         <button
           type="button"
           onClick={handleTryDemo}
           disabled={demoLoading}
-          style={{
-            width: '100%',
-            padding: '14px',
-            borderRadius: 8,
-            border: '2px solid #667eea',
-            background: '#fff',
-            color: '#667eea',
-            fontSize: 15,
-            fontWeight: 700,
-            cursor: demoLoading ? 'default' : 'pointer',
-            opacity: demoLoading ? 0.7 : 1,
-            marginBottom: 20,
-          }}
+          className="btn btn-accent btn-block"
         >
-          {demoLoading ? 'Loading demo…' : 'Try the Demo (no signup needed)'}
+          {demoLoading ? 'Loading demo…' : 'Try the Demo — no signup needed'}
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
-          <span style={{ fontSize: 13, color: '#a0aec0' }}>or sign in</span>
-          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
+          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          <span style={{ fontSize: 13, color: 'var(--muted)' }}>or sign in</span>
+          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            style={inputStyle}
+            className="field"
           />
           <input
             type="password"
@@ -174,29 +149,17 @@ function Login() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
-            style={inputStyle}
+            className="field"
           />
-          {error && <p style={{ color: '#e53e3e', margin: 0, fontSize: 14 }}>{error}</p>}
-          <button
-            type="submit"
-            style={{
-              width: '100%',
-              padding: '14px',
-              borderRadius: 8,
-              border: 'none',
-              background: 'linear-gradient(135deg, #667eea, #764ba2)',
-              color: '#fff',
-              fontSize: 16,
-              fontWeight: 'bold',
-              cursor: 'pointer',
-            }}
-          >
+          {error && <p style={{ color: 'var(--danger)', margin: 0, fontSize: 14 }}>{error}</p>}
+          <button type="submit" className="btn btn-primary btn-block">
             Log In
           </button>
         </form>
-        <p style={{ marginTop: 20, textAlign: 'center', fontSize: 14, color: '#718096' }}>
+
+        <p style={{ marginTop: 20, textAlign: 'center', fontSize: 14, color: 'var(--muted)' }}>
           Don&apos;t have an account?{' '}
-          <Link to="/register" style={{ color: '#667eea', fontWeight: 600, textDecoration: 'none' }}>
+          <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
             Register
           </Link>
         </p>

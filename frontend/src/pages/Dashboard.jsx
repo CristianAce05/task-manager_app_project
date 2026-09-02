@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { getTasks, createTask, updateTask, deleteTask } from '../api/tasks'
 
 const EMPTY_FORM = { title: '', description: '', status: 'pending', due_date: '' }
@@ -13,6 +14,10 @@ const QUOTES = [
   "One task at a time.",
 ]
 
+const STATUS_LABEL = { pending: 'Pending', in_progress: 'In Progress', completed: 'Completed' }
+const STATUS_BADGE_CLASS = { pending: 'badge-pending', in_progress: 'badge-progress', completed: 'badge-completed' }
+const STATUS_DOT_VAR = { pending: 'var(--pending)', in_progress: 'var(--progress)', completed: 'var(--completed)' }
+
 function parseLocalDate(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number)
   return new Date(y, m - 1, d)
@@ -20,40 +25,17 @@ function parseLocalDate(dateStr) {
 
 function Dashboard() {
   const { token, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
   const [tasks, setTasks] = useState([])
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState('')
-  const [darkMode, setDarkMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [hoveredBtn, setHoveredBtn] = useState(null)
 
   const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)])
-
-  function hoverProps(key) {
-    return {
-      onMouseEnter: () => setHoveredBtn(key),
-      onMouseLeave: () => setHoveredBtn(null),
-    }
-  }
-
-  function hoverStyle(key) {
-    return hoveredBtn === key
-      ? { transform: 'scale(1.03)', transition: 'all 0.2s ease' }
-      : { transform: 'scale(1)', transition: 'all 0.2s ease' }
-  }
-
-  const theme = {
-    background: darkMode ? '#1a202c' : '#f7fafc',
-    color: darkMode ? '#e2e8f0' : '#1a202c',
-    cardBg: darkMode ? '#2d3748' : '#fff',
-    inputBg: darkMode ? '#4a5568' : '#fff',
-    inputColor: darkMode ? '#e2e8f0' : '#1a202c',
-    inputBorder: darkMode ? '#4a5568' : '#e2e8f0',
-  }
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -68,29 +50,6 @@ function Dashboard() {
     if (!token) { navigate('/'); return }
     fetchTasks()
   }, [token, navigate, fetchTasks])
-
-  useEffect(() => {
-    const style = document.createElement('style')
-    style.id = 'dashboard-animations'
-    style.textContent = `
-      @keyframes fadeSlideIn {
-        from { opacity: 0; transform: translateX(-20px); }
-        to   { opacity: 1; transform: translateX(0); }
-      }
-      @keyframes floatAnim {
-        0%   { transform: translateY(0px); }
-        50%  { transform: translateY(-12px); }
-        100% { transform: translateY(0px); }
-      }
-    `
-    if (!document.getElementById('dashboard-animations')) {
-      document.head.appendChild(style)
-    }
-    return () => {
-      const existing = document.getElementById('dashboard-animations')
-      if (existing) existing.remove()
-    }
-  }, [])
 
   function handleEdit(task) {
     setEditingId(task.id)
@@ -151,73 +110,42 @@ function Dashboard() {
     navigate('/')
   }
 
-  const cardStyle = {
-    background: theme.cardBg,
-    borderRadius: 12,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-    padding: '24px',
-    marginBottom: 24,
-  }
-
-  const inputStyle = {
-    width: '100%',
-    padding: '12px',
-    fontSize: 14,
-    background: theme.inputBg,
-    color: theme.inputColor,
-    border: `1px solid ${theme.inputBorder}`,
-    borderRadius: 8,
-    boxSizing: 'border-box',
-    outline: 'none',
-  }
-
-  const gradientBtn = {
-    background: 'linear-gradient(135deg, #667eea, #764ba2)',
-    color: '#fff',
-    border: 'none',
-    borderRadius: 8,
-    padding: '12px 24px',
-    fontSize: 14,
-    fontWeight: 'bold',
-    cursor: 'pointer',
-  }
-
-  const statusBadge = {
-    pending:     { background: '#ed8936', color: '#fff' },
-    in_progress: { background: '#4299e1', color: '#fff' },
-    completed:   { background: '#48bb78', color: '#fff' },
-  }
+  const pendingCount = tasks.filter(t => t.status === 'pending').length
+  const inProgressCount = tasks.filter(t => t.status === 'in_progress').length
+  const completedCount = tasks.filter(t => t.status === 'completed').length
 
   return (
-    <div style={{ minHeight: '100vh', background: theme.background, color: theme.color }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       {/* Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, #667eea, #764ba2)',
-        padding: '20px 32px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 32,
-      }}>
+      <div
+        style={{
+          background: 'var(--primary)',
+          padding: '20px 32px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: 10 }}>
-            <circle cx="16" cy="16" r="14" stroke="#fff" strokeWidth="2.5" />
-            <polyline points="9,16 14,21 23,11" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="30" height="30" viewBox="0 0 32 32" fill="none" style={{ marginRight: 10 }}>
+            <circle cx="16" cy="16" r="14" stroke="var(--primary-ink)" strokeWidth="2.5" />
+            <polyline points="9,16 14,21 23,11" stroke="var(--primary-ink)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span style={{ color: '#fff', fontSize: 22, fontWeight: 800 }}>TaskManager</span>
+          <span style={{ color: 'var(--primary-ink)', fontSize: 21, fontWeight: 800 }}>TaskManager</span>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
-            onClick={() => setDarkMode(d => !d)}
-            style={{ padding: '8px 16px', cursor: 'pointer', background: 'transparent', color: '#fff', border: '1px solid #fff', borderRadius: 8, fontSize: 14, ...hoverStyle('darkMode') }}
-            {...hoverProps('darkMode')}
+            onClick={toggleTheme}
+            className="btn btn-sm"
+            style={{ background: 'transparent', color: 'var(--primary-ink)', border: '1.5px solid var(--primary-ink)' }}
           >
-            {darkMode ? 'Light Mode' : 'Dark Mode'}
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
           </button>
           <button
             onClick={handleLogout}
-            style={{ padding: '8px 16px', cursor: 'pointer', background: 'transparent', color: '#fff', border: '1px solid #fff', borderRadius: 8, fontSize: 14, ...hoverStyle('logout') }}
-            {...hoverProps('logout')}
+            className="btn btn-sm"
+            style={{ background: 'transparent', color: 'var(--primary-ink)', border: '1.5px solid var(--primary-ink)' }}
           >
             Log Out
           </button>
@@ -225,19 +153,23 @@ function Dashboard() {
       </div>
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px 32px' }}>
-        {error && <p style={{ color: '#e53e3e', marginBottom: 16 }}>{error}</p>}
+        {error && <p style={{ color: 'var(--danger)', marginBottom: 16 }}>{error}</p>}
 
         {/* Stats Bar */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
           {[
-            { label: 'Total Tasks',  value: tasks.length,                                         color: '#667eea' },
-            { label: 'Pending',      value: tasks.filter(t => t.status === 'pending').length,     color: '#ed8936' },
-            { label: 'In Progress',  value: tasks.filter(t => t.status === 'in_progress').length, color: '#4299e1' },
-            { label: 'Completed',    value: tasks.filter(t => t.status === 'completed').length,   color: '#48bb78' },
-          ].map(stat => (
-            <div key={stat.label} style={{ background: theme.cardBg, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', padding: 20 }}>
+            { label: 'Total Tasks', value: tasks.length, color: 'var(--primary)' },
+            { label: 'Pending', value: pendingCount, color: 'var(--pending)' },
+            { label: 'In Progress', value: inProgressCount, color: 'var(--progress)' },
+            { label: 'Completed', value: completedCount, color: 'var(--completed)' },
+          ].map((stat, i) => (
+            <div
+              key={stat.label}
+              className="card anim-fade-up"
+              style={{ padding: 20, animationDelay: `${i * 0.06}s` }}
+            >
               <div style={{ fontSize: 32, fontWeight: 800, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
-              <div style={{ fontSize: 13, color: theme.color, opacity: 0.7, marginTop: 6 }}>{stat.label}</div>
+              <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 6 }}>{stat.label}</div>
             </div>
           ))}
         </div>
@@ -249,43 +181,50 @@ function Dashboard() {
           <div style={{ display: 'flex', flexDirection: 'column' }}>
 
             {/* Motivational Quote Banner */}
-            <div style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: 12, padding: '20px 28px', marginBottom: 24, color: '#fff' }}>
+            <div
+              className="anim-fade-up"
+              style={{
+                background: 'linear-gradient(135deg, var(--primary), var(--accent))',
+                borderRadius: 'var(--radius)',
+                padding: '20px 28px',
+                marginBottom: 24,
+                color: '#fff',
+              }}
+            >
               <p style={{ margin: '0 0 6px', fontSize: 16, fontStyle: 'italic' }}>&ldquo;{quote}&rdquo;</p>
-              <p style={{ margin: 0, fontSize: 13, opacity: 0.8 }}>— TaskManager</p>
+              <p style={{ margin: 0, fontSize: 13, opacity: 0.85 }}>— TaskManager</p>
             </div>
 
             {/* Search and Filter Controls */}
-            <div style={{ ...cardStyle, padding: 20 }}>
+            <div className="card anim-fade-up" style={{ padding: 20, marginBottom: 24 }}>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <input
                   type="text"
                   placeholder="Search by title..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  style={{ ...inputStyle, flex: '1 1 200px' }}
+                  className="field"
+                  style={{ flex: '1 1 200px' }}
                 />
                 <select
                   value={statusFilter}
                   onChange={e => setStatusFilter(e.target.value)}
-                  style={{ ...inputStyle, flex: '0 1 160px' }}
+                  className="field"
+                  style={{ flex: '0 1 160px' }}
                 >
                   <option value="all">All</option>
                   <option value="pending">Pending</option>
                   <option value="in_progress">In Progress</option>
                   <option value="completed">Completed</option>
                 </select>
-                <button
-                  onClick={clearFilters}
-                  style={{ padding: '12px 20px', cursor: 'pointer', borderRadius: 8, border: `1px solid ${theme.inputBorder}`, background: theme.cardBg, color: theme.color, fontSize: 14, ...hoverStyle('clearFilters') }}
-                  {...hoverProps('clearFilters')}
-                >
+                <button onClick={clearFilters} className="btn btn-ghost">
                   Clear filters
                 </button>
               </div>
             </div>
 
             {/* Task Form */}
-            <div style={{ ...cardStyle, marginBottom: 0, flex: 1 }}>
+            <div className="card anim-fade-up" style={{ flex: 1 }}>
               <h3 style={{ marginTop: 0, marginBottom: 16, fontSize: 18, fontWeight: 700 }}>
                 {editingId ? 'Edit Task' : 'New Task'}
               </h3>
@@ -296,19 +235,20 @@ function Dashboard() {
                   value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   required
-                  style={inputStyle}
+                  className="field"
                 />
                 <textarea
                   placeholder="Description"
                   value={form.description}
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   rows={3}
-                  style={{ ...inputStyle, resize: 'vertical' }}
+                  className="field"
+                  style={{ resize: 'vertical' }}
                 />
                 <select
                   value={form.status}
                   onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                  style={inputStyle}
+                  className="field"
                 >
                   <option value="pending">Pending</option>
                   <option value="in_progress">In Progress</option>
@@ -318,19 +258,14 @@ function Dashboard() {
                   type="date"
                   value={form.due_date}
                   onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))}
-                  style={inputStyle}
+                  className="field"
                 />
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button type="submit" style={{ ...gradientBtn, ...hoverStyle('submit') }} {...hoverProps('submit')}>
+                  <button type="submit" className="btn btn-accent">
                     {editingId ? 'Update Task' : 'Add Task'}
                   </button>
                   {editingId && (
-                    <button
-                      type="button"
-                      onClick={handleCancelEdit}
-                      style={{ ...gradientBtn, background: 'transparent', color: theme.color, border: `1px solid ${theme.inputBorder}`, ...hoverStyle('cancel') }}
-                      {...hoverProps('cancel')}
-                    >
+                    <button type="button" onClick={handleCancelEdit} className="btn btn-ghost">
                       Cancel
                     </button>
                   )}
@@ -347,57 +282,54 @@ function Dashboard() {
             {(() => {
               const circumference = 2 * Math.PI * 60
               const total = tasks.length
-              const pendingCount    = tasks.filter(t => t.status === 'pending').length
-              const inProgressCount = tasks.filter(t => t.status === 'in_progress').length
-              const completedCount  = tasks.filter(t => t.status === 'completed').length
 
-              const pendingLen    = total ? (pendingCount    / total) * circumference : 0
+              const pendingLen = total ? (pendingCount / total) * circumference : 0
               const inProgressLen = total ? (inProgressCount / total) * circumference : 0
-              const completedLen  = total ? (completedCount  / total) * circumference : 0
+              const completedLen = total ? (completedCount / total) * circumference : 0
 
-              const completedOffset  = 0
+              const completedOffset = 0
               const inProgressOffset = -(completedLen)
-              const pendingOffset    = -(completedLen + inProgressLen)
+              const pendingOffset = -(completedLen + inProgressLen)
 
               const legend = [
-                { label: 'Pending',     count: pendingCount,    color: '#ed8936' },
-                { label: 'In Progress', count: inProgressCount, color: '#4299e1' },
-                { label: 'Completed',   count: completedCount,  color: '#48bb78' },
+                { label: 'Pending', count: pendingCount, color: 'var(--pending)' },
+                { label: 'In Progress', count: inProgressCount, color: 'var(--progress)' },
+                { label: 'Completed', count: completedCount, color: 'var(--completed)' },
               ]
 
               return (
-                <div style={{ ...cardStyle, marginBottom: 0 }}>
-                  <p style={{ margin: '0 0 20px', fontSize: 16, fontWeight: 700, color: theme.color }}>Task Overview</p>
+                <div className="card anim-fade-up">
+                  <p style={{ margin: '0 0 20px', fontSize: 16, fontWeight: 700 }}>Task Overview</p>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <svg width="160" height="160" viewBox="0 0 160 160">
-                      <circle cx="80" cy="80" r="60" fill="none" stroke={darkMode ? '#4a5568' : '#e2e8f0'} strokeWidth="20" />
+                      <circle cx="80" cy="80" r="60" fill="none" stroke="var(--border)" strokeWidth="20" />
                       {total === 0 ? (
-                        <text x="80" y="86" textAnchor="middle" fontSize="13" fill={darkMode ? '#718096' : '#a0aec0'}>No data yet</text>
+                        <text x="80" y="86" textAnchor="middle" fontSize="13" fill="var(--muted)">No data yet</text>
                       ) : (
                         <>
                           <circle cx="80" cy="80" r="60" fill="none"
-                            stroke="#48bb78" strokeWidth="20"
+                            stroke="var(--completed)" strokeWidth="20"
                             strokeDasharray={`${completedLen} ${circumference}`}
                             strokeDashoffset={completedOffset}
                             strokeLinecap="butt"
                             transform="rotate(-90 80 80)"
                           />
                           <circle cx="80" cy="80" r="60" fill="none"
-                            stroke="#4299e1" strokeWidth="20"
+                            stroke="var(--progress)" strokeWidth="20"
                             strokeDasharray={`${inProgressLen} ${circumference}`}
                             strokeDashoffset={inProgressOffset}
                             strokeLinecap="butt"
                             transform="rotate(-90 80 80)"
                           />
                           <circle cx="80" cy="80" r="60" fill="none"
-                            stroke="#ed8936" strokeWidth="20"
+                            stroke="var(--pending)" strokeWidth="20"
                             strokeDasharray={`${pendingLen} ${circumference}`}
                             strokeDashoffset={pendingOffset}
                             strokeLinecap="butt"
                             transform="rotate(-90 80 80)"
                           />
-                          <text x="80" y="76" textAnchor="middle" fontSize="26" fontWeight="bold" fill={theme.color}>{total}</text>
-                          <text x="80" y="94" textAnchor="middle" fontSize="12" fill={darkMode ? '#718096' : '#a0aec0'}>tasks</text>
+                          <text x="80" y="76" textAnchor="middle" fontSize="26" fontWeight="bold" fill="var(--ink)">{total}</text>
+                          <text x="80" y="94" textAnchor="middle" fontSize="12" fill="var(--muted)">tasks</text>
                         </>
                       )}
                     </svg>
@@ -406,7 +338,7 @@ function Dashboard() {
                         <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <div style={{ width: 12, height: 12, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
-                            <span style={{ fontSize: 14, color: theme.color }}>{item.label}</span>
+                            <span style={{ fontSize: 14 }}>{item.label}</span>
                           </div>
                           <span style={{ fontSize: 14, fontWeight: 700, color: item.color }}>{item.count}</span>
                         </div>
@@ -433,18 +365,18 @@ function Dashboard() {
                 .map(t => {
                   const due = parseLocalDate(t.due_date)
                   const daysLeft = Math.ceil((due - today) / (1000 * 60 * 60 * 24))
-                  const urgencyColor = daysLeft <= 2 ? '#e53e3e' : daysLeft <= 5 ? '#ed8936' : '#4299e1'
+                  const urgencyColor = daysLeft <= 2 ? 'var(--danger)' : daysLeft <= 5 ? 'var(--pending)' : 'var(--progress)'
                   return { ...t, daysLeft, urgencyColor, dueObj: due }
                 })
                 .sort((a, b) => a.dueObj - b.dueObj)
                 .slice(0, 4)
 
               const FULL_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
-              const DAY_LABELS  = ['Su','Mo','Tu','We','Th','Fr','Sa']
-              const now         = new Date()
-              const todayNum    = now.getDate()
-              const thisMonth   = now.getMonth()
-              const thisYear    = now.getFullYear()
+              const DAY_LABELS = ['Su','Mo','Tu','We','Th','Fr','Sa']
+              const now = new Date()
+              const todayNum = now.getDate()
+              const thisMonth = now.getMonth()
+              const thisYear = now.getFullYear()
 
               const dueDays = new Set(
                 tasks
@@ -456,7 +388,7 @@ function Dashboard() {
                   .map(t => parseLocalDate(t.due_date).getDate())
               )
 
-              const firstDow    = new Date(thisYear, thisMonth, 1).getDay()
+              const firstDow = new Date(thisYear, thisMonth, 1).getDay()
               const daysInMonth = new Date(thisYear, thisMonth + 1, 0).getDate()
               const cells = [
                 ...Array(firstDow).fill(null),
@@ -464,10 +396,10 @@ function Dashboard() {
               ]
 
               return (
-                <div style={{ ...cardStyle, marginBottom: 0, flex: 1 }}>
-                  <p style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: theme.color }}>Upcoming Deadlines</p>
+                <div className="card anim-fade-up" style={{ flex: 1 }}>
+                  <p style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700 }}>Upcoming Deadlines</p>
                   {upcoming.length === 0 ? (
-                    <p style={{ margin: 0, fontSize: 14, color: theme.color, opacity: 0.5 }}>No upcoming deadlines</p>
+                    <p style={{ margin: 0, fontSize: 14, color: 'var(--muted)' }}>No upcoming deadlines</p>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       {upcoming.map(task => {
@@ -492,7 +424,7 @@ function Dashboard() {
                               </span>
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: theme.color, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {task.title}
                               </p>
                               <p style={{ margin: 0, fontSize: 12, color: task.urgencyColor, fontWeight: 600 }}>
@@ -505,16 +437,14 @@ function Dashboard() {
                     </div>
                   )}
 
-                  {/* Divider */}
-                  <div style={{ borderTop: `1px solid ${theme.inputBorder}`, margin: '20px 0' }} />
+                  <div style={{ borderTop: '1px solid var(--border)', margin: '20px 0' }} />
 
-                  {/* Mini Calendar */}
-                  <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, color: theme.color, textAlign: 'center' }}>
+                  <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, textAlign: 'center' }}>
                     {FULL_MONTHS[thisMonth]} {thisYear}
                   </p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px 0', textAlign: 'center' }}>
                     {DAY_LABELS.map(d => (
-                      <span key={d} style={{ fontSize: 11, fontWeight: 700, color: theme.color, opacity: 0.45, paddingBottom: 4 }}>{d}</span>
+                      <span key={d} style={{ fontSize: 11, fontWeight: 700, opacity: 0.45, paddingBottom: 4 }}>{d}</span>
                     ))}
                     {cells.map((day, i) => (
                       <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 2 }}>
@@ -526,13 +456,13 @@ function Dashboard() {
                               borderRadius: '50%',
                               fontSize: 12,
                               fontWeight: day === todayNum ? 700 : 400,
-                              background: day === todayNum ? '#667eea' : 'transparent',
-                              color: day === todayNum ? '#fff' : theme.color,
+                              background: day === todayNum ? 'var(--primary)' : 'transparent',
+                              color: day === todayNum ? 'var(--primary-ink)' : 'var(--ink)',
                             }}>
                               {day}
                             </span>
                             {dueDays.has(day) && (
-                              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#ed8936', marginTop: 1 }} />
+                              <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--pending)', marginTop: 1 }} />
                             )}
                           </>
                         ) : null}
@@ -550,72 +480,56 @@ function Dashboard() {
         {filteredTasks.length === 0 ? (
           tasks.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '48px 0' }}>
-              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: 16 }}>
-                <rect x="12" y="8" width="40" height="48" rx="4" stroke="#a0aec0" strokeWidth="2.5" fill="none" />
-                <line x1="20" y1="22" x2="44" y2="22" stroke="#a0aec0" strokeWidth="2.5" strokeLinecap="round" />
-                <line x1="20" y1="30" x2="44" y2="30" stroke="#a0aec0" strokeWidth="2.5" strokeLinecap="round" />
-                <line x1="20" y1="38" x2="34" y2="38" stroke="#a0aec0" strokeWidth="2.5" strokeLinecap="round" />
-                <rect x="24" y="4" width="16" height="8" rx="2" stroke="#a0aec0" strokeWidth="2.5" fill="none" />
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" style={{ marginBottom: 16 }}>
+                <rect x="12" y="8" width="40" height="48" rx="4" stroke="var(--muted)" strokeWidth="2.5" fill="none" />
+                <line x1="20" y1="22" x2="44" y2="22" stroke="var(--muted)" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="20" y1="30" x2="44" y2="30" stroke="var(--muted)" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="20" y1="38" x2="34" y2="38" stroke="var(--muted)" strokeWidth="2.5" strokeLinecap="round" />
+                <rect x="24" y="4" width="16" height="8" rx="2" stroke="var(--muted)" strokeWidth="2.5" fill="none" />
               </svg>
-              <p style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: theme.color }}>No tasks yet</p>
-              <p style={{ margin: 0, fontSize: 14, color: theme.color, opacity: 0.6 }}>Create your first task above</p>
+              <p style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700 }}>No tasks yet</p>
+              <p style={{ margin: 0, fontSize: 14, color: 'var(--muted)' }}>Create your first task above</p>
             </div>
           ) : (
-            <p style={{ color: theme.color }}>No tasks match your filters.</p>
+            <p>No tasks match your filters.</p>
           )
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
             {filteredTasks.map((task, index) => (
               <div
                 key={task.id}
+                className="card card-interactive anim-fade-in"
                 style={{
-                  background: theme.cardBg,
-                  borderRadius: 12,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                  padding: 20,
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'flex-start',
                   gap: 12,
-                  animation: 'fadeSlideIn 0.4s ease-out both',
-                  animationDelay: `${index * 0.08}s`,
+                  padding: 20,
+                  animationDelay: `${index * 0.06}s`,
+                  borderLeft: `4px solid ${STATUS_DOT_VAR[task.status] || 'var(--border)'}`,
                 }}
               >
                 <div style={{ flex: 1 }}>
-                  <strong style={{ fontSize: 16, color: theme.color }}>{task.title}</strong>
+                  <strong style={{ fontSize: 16 }}>{task.title}</strong>
                   {task.description && (
-                    <p style={{ margin: '6px 0', fontSize: 14, color: theme.color, opacity: 0.8 }}>{task.description}</p>
+                    <p style={{ margin: '6px 0', fontSize: 14, color: 'var(--muted)' }}>{task.description}</p>
                   )}
                   <div style={{ marginTop: 8, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <span style={{
-                      ...(statusBadge[task.status] || { background: '#718096', color: '#fff' }),
-                      padding: '3px 10px',
-                      borderRadius: 20,
-                      fontSize: 12,
-                      fontWeight: 600,
-                    }}>
-                      {(task.status || '').replace('_', ' ')}
+                    <span className={`badge ${STATUS_BADGE_CLASS[task.status] || ''}`}>
+                      {STATUS_LABEL[task.status] || task.status}
                     </span>
                     {task.due_date && (
-                      <span style={{ fontSize: 13, color: theme.color, opacity: 0.7 }}>
+                      <span style={{ fontSize: 13, color: 'var(--muted)' }}>
                         Due: {task.due_date.slice(0, 10)}
                       </span>
                     )}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                  <button
-                    onClick={() => handleEdit(task)}
-                    style={{ padding: '6px 14px', cursor: 'pointer', background: 'transparent', color: '#667eea', border: '1px solid #667eea', borderRadius: 8, fontSize: 13, fontWeight: 600, ...hoverStyle(`edit-${task.id}`) }}
-                    {...hoverProps(`edit-${task.id}`)}
-                  >
+                  <button onClick={() => handleEdit(task)} className="btn btn-outline btn-sm">
                     Edit
                   </button>
-                  <button
-                    onClick={() => handleDelete(task.id)}
-                    style={{ padding: '6px 14px', cursor: 'pointer', background: '#e53e3e', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, ...hoverStyle(`delete-${task.id}`) }}
-                    {...hoverProps(`delete-${task.id}`)}
-                  >
+                  <button onClick={() => handleDelete(task.id)} className="btn btn-danger btn-sm">
                     Delete
                   </button>
                 </div>
