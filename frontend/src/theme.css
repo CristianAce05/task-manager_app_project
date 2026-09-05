@@ -240,9 +240,59 @@ h1, h2, h3, h4 {
 .bento-span-4 { grid-column: span 4; }
 .bento-row-2 { grid-row: span 2; }
 
+/* Two-pane tiles (donut+legend, deadlines+calendar) wrap instead of
+   squeezing side by side once space runs out. */
+.split-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.split-row > * {
+  min-width: 200px;
+}
+
+.task-form-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1.6fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .task-form-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .task-form-grid { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 900px) {
   .bento-grid { grid-template-columns: repeat(2, 1fr); }
   .bento-span-2, .bento-span-4 { grid-column: span 2; }
+}
+
+@media (max-width: 768px) {
+  .app-shell { flex-direction: column; }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    padding: 14px 16px;
+    gap: 16px;
+    overflow-x: auto;
+  }
+  .sidebar-brand { margin-bottom: 0; flex-shrink: 0; }
+  .sidebar-nav { flex-direction: row; flex: 0 0 auto; }
+  .sidebar-nav-label { display: none; }
+  .sidebar-link { white-space: nowrap; }
+  .sidebar > div:last-child { flex-direction: row; flex-shrink: 0; margin-left: auto; }
+  .sidebar > div:last-child .btn { white-space: nowrap; }
+  .main-area { padding: 20px; }
+}
+
+@media (max-width: 640px) {
+  .bento-grid { grid-template-columns: repeat(2, 1fr); }
+  .bento-span-2 { grid-column: span 2; }
 }
 
 /* ---------------- motion ---------------- */

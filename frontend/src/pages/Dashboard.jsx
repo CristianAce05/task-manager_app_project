@@ -138,7 +138,7 @@ function Dashboard() {
         </div>
 
         <nav className="sidebar-nav">
-          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '0 12px', marginBottom: 6 }}>
+          <p className="sidebar-nav-label" style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '0 12px', marginBottom: 6 }}>
             Filter
           </p>
           {FILTERS.map(f => (
@@ -214,7 +214,7 @@ function Dashboard() {
               { label: 'Completed', count: completedCount, color: 'var(--completed)' },
             ]
             return (
-              <div className="card bento-span-2 anim-fade-up" style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+              <div className="card bento-span-2 anim-fade-up split-row" style={{ alignItems: 'center' }}>
                 <svg width="130" height="130" viewBox="0 0 160 160" style={{ flexShrink: 0 }}>
                   <circle cx="80" cy="80" r="60" fill="none" stroke="var(--border)" strokeWidth="20" />
                   {total === 0 ? (
@@ -292,7 +292,7 @@ function Dashboard() {
             const cells = [...Array(firstDow).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)]
 
             return (
-              <div className="card bento-span-2 anim-fade-up" style={{ display: 'flex', gap: 24 }}>
+              <div className="card bento-span-2 anim-fade-up split-row">
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 700 }}>Upcoming Deadlines</p>
                   {upcoming.length === 0 ? (
@@ -351,7 +351,7 @@ function Dashboard() {
           <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 16 }}>
             {editingId ? 'Edit Task' : 'New Task'}
           </h3>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1.4fr 1.6fr 1fr 1fr auto', gap: 12, alignItems: 'start' }}>
+          <form onSubmit={handleSubmit} className="task-form-grid">
             <input type="text" placeholder="Title" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required className="field" />
             <input type="text" placeholder="Description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="field" />
             <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} className="field">
