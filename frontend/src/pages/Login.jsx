@@ -46,124 +46,143 @@ function Login() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'var(--bg)',
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 24,
-      }}
-    >
-      {/* Ambient glow blobs — brand color, static-safe under reduced motion */}
+    <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--bg)' }}>
+      {/* Brand panel — hidden on narrow screens */}
       <div
-        aria-hidden="true"
+        className="login-brand-panel"
         style={{
-          position: 'absolute',
-          top: '-120px',
-          left: '-100px',
-          width: 340,
-          height: 340,
-          borderRadius: '50%',
-          background: 'var(--primary)',
-          filter: 'blur(90px)',
-          opacity: 0.22,
-          animation: 'floatGlow 10s ease-in-out infinite',
-          pointerEvents: 'none',
+          flex: '1 1 45%',
+          background: 'linear-gradient(155deg, var(--primary), #2a1a4a 65%)',
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '48px 56px',
+          color: '#fff',
         }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: '-140px',
-          right: '-100px',
-          width: 380,
-          height: 380,
-          borderRadius: '50%',
-          background: 'var(--accent)',
-          filter: 'blur(100px)',
-          opacity: 0.18,
-          animation: 'floatGlow 12s ease-in-out infinite reverse',
-          pointerEvents: 'none',
-        }}
-      />
-
-      <button
-        type="button"
-        onClick={toggleTheme}
-        className="btn btn-ghost btn-sm"
-        style={{ position: 'absolute', top: 20, right: 20 }}
-        aria-label="Toggle dark mode"
       >
-        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-      </button>
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute', top: '-80px', right: '-60px',
+            width: 320, height: 320, borderRadius: '50%',
+            background: 'var(--accent)', filter: 'blur(90px)', opacity: 0.45,
+            animation: 'floatGlow 11s ease-in-out infinite',
+          }}
+        />
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute', bottom: '-100px', left: '-40px',
+            width: 260, height: 260, borderRadius: '50%',
+            background: 'var(--gold)', filter: 'blur(90px)', opacity: 0.3,
+            animation: 'floatGlow 14s ease-in-out infinite reverse',
+          }}
+        />
 
-      <div
-        className="card anim-fade-up"
-        style={{ maxWidth: 420, width: '100%', position: 'relative', zIndex: 1 }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
           <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
-            <circle cx="16" cy="16" r="14" stroke="var(--primary)" strokeWidth="2.5" />
-            <polyline points="9,16 14,21 23,11" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="16" cy="16" r="14" stroke="#fff" strokeWidth="2.5" />
+            <polyline points="9,16 14,21 23,11" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: 'var(--ink)' }}>
-            Welcome back
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 800 }}>TaskManager</span>
+        </div>
+
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 380 }}>
+          <h1 style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.1, marginBottom: 16 }}>
+            Organize the work that actually matters.
           </h1>
-        </div>
-        <p style={{ margin: '0 0 24px', fontSize: 15, color: 'var(--muted)' }}>
-          Sign in to keep your work moving.
-        </p>
-
-        <button
-          type="button"
-          onClick={handleTryDemo}
-          disabled={demoLoading}
-          className="btn btn-accent btn-block"
-        >
-          {demoLoading ? 'Loading demo…' : 'Try the Demo — no signup needed'}
-        </button>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-          <span style={{ fontSize: 13, color: 'var(--muted)' }}>or sign in</span>
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          <p style={{ fontSize: 16, opacity: 0.85, lineHeight: 1.6, fontFamily: 'var(--font-body)' }}>
+            Track tasks, deadlines, and progress in one place — built for
+            teams who'd rather ship than manage spreadsheets.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            className="field"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            className="field"
-          />
-          {error && <p style={{ color: 'var(--danger)', margin: 0, fontSize: 14 }}>{error}</p>}
-          <button type="submit" className="btn btn-primary btn-block">
-            Log In
-          </button>
-        </form>
-
-        <p style={{ marginTop: 20, textAlign: 'center', fontSize: 14, color: 'var(--muted)' }}>
-          Don&apos;t have an account?{' '}
-          <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
-            Register
-          </Link>
+        <p style={{ position: 'relative', zIndex: 1, fontSize: 13, opacity: 0.6, fontFamily: 'var(--font-body)' }}>
+          © 2026 TaskManager
         </p>
       </div>
+
+      {/* Form panel */}
+      <div
+        style={{
+          flex: '1 1 55%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+          position: 'relative',
+        }}
+      >
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="btn btn-ghost btn-sm"
+          style={{ position: 'absolute', top: 24, right: 24 }}
+          aria-label="Toggle dark mode"
+        >
+          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+        </button>
+
+        <div className="anim-fade-up" style={{ maxWidth: 380, width: '100%' }}>
+          <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 6 }}>Welcome back</h2>
+          <p style={{ margin: '0 0 24px', fontSize: 15, color: 'var(--muted)', fontFamily: 'var(--font-body)' }}>
+            Sign in to keep your work moving.
+          </p>
+
+          <button
+            type="button"
+            onClick={handleTryDemo}
+            disabled={demoLoading}
+            className="btn btn-accent btn-block"
+          >
+            {demoLoading ? 'Loading demo…' : 'Try the Demo — no signup needed'}
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+            <span style={{ fontSize: 13, color: 'var(--muted)' }}>or sign in</span>
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          </div>
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              className="field"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              className="field"
+            />
+            {error && <p style={{ color: 'var(--danger)', margin: 0, fontSize: 14 }}>{error}</p>}
+            <button type="submit" className="btn btn-primary btn-block">
+              Log In
+            </button>
+          </form>
+
+          <p style={{ marginTop: 20, textAlign: 'center', fontSize: 14, color: 'var(--muted)' }}>
+            Don&apos;t have an account?{' '}
+            <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
+              Register
+            </Link>
+          </p>
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 860px) {
+          .login-brand-panel { display: none; }
+        }
+      `}</style>
     </div>
   )
 }
