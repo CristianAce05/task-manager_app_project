@@ -180,7 +180,7 @@ function Login() {
 
       <style>{`
         @media (max-width: 860px) {
-          .login-brand-panel { display: none; }
+          .login-brand-panel { display: none !important; }
         }
       `}</style>
     </div>
