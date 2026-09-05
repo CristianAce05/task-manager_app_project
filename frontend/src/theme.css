@@ -250,6 +250,14 @@ h1, h2, h3, h4 {
 .split-row > * {
   min-width: 200px;
 }
+.split-divider {
+  width: 1px;
+  min-width: 1px;
+  align-self: stretch;
+}
+@media (max-width: 900px) {
+  .split-divider { display: none; }
+}
 
 .task-form-grid {
   display: grid;

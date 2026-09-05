@@ -293,7 +293,7 @@ function Dashboard() {
 
             return (
               <div className="card bento-span-2 anim-fade-up split-row">
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ flex: 1 }}>
                   <p style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 700 }}>Upcoming Deadlines</p>
                   {upcoming.length === 0 ? (
                     <p style={{ margin: 0, fontSize: 13, color: 'var(--muted)' }}>Nothing due soon</p>
@@ -316,7 +316,7 @@ function Dashboard() {
                     </div>
                   )}
                 </div>
-                <div style={{ width: 1, background: 'var(--border)' }} />
+                <div className="split-divider" style={{ background: 'var(--border)' }} />
                 <div style={{ flex: 1 }}>
                   <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, textAlign: 'center' }}>{FULL_MONTHS[thisMonth]} {thisYear}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '3px 0', textAlign: 'center' }}>
